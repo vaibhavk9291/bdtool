@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string().min(1),
+  DATABASE_URL: z.string().default('file:./dev.db'),
   TURSO_DATABASE_URL: z.string().optional(),
   TURSO_AUTH_TOKEN: z.string().optional(),
   NEXT_PUBLIC_DEFAULT_COUNTRY_CODE: z.string().default('+91'),
