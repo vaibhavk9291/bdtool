@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaLibSql } from '@prisma/adapter-libsql'
+import { PrismaLibSQL } from '@prisma/adapter-libsql'
 import { createClient } from '@libsql/client/web'
 import { env } from './env' // We will create this in the next task
 
@@ -11,7 +11,7 @@ function buildClient(): PrismaClient {
       url: env.TURSO_DATABASE_URL, 
       authToken: env.TURSO_AUTH_TOKEN 
     })
-    const adapter = new PrismaLibSql(libsql as any)
+    const adapter = new PrismaLibSQL(libsql as any)
     return new PrismaClient({ adapter } as any)
   }
   // Local: standard SQLite
