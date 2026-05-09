@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaLibSql } from '@prisma/adapter-libsql'
-import { createClient } from '@libsql/client'
+import { createClient } from '@libsql/client/web'
 import { env } from './env' // We will create this in the next task
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
