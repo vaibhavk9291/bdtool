@@ -11,8 +11,8 @@ function buildClient(): PrismaClient {
       url: env.TURSO_DATABASE_URL, 
       authToken: env.TURSO_AUTH_TOKEN 
     })
-    const adapter = new PrismaLibSql(libsql)
-    return new PrismaClient({ adapter })
+    const adapter = new PrismaLibSql(libsql as any)
+    return new PrismaClient({ adapter } as any)
   }
   // Local: standard SQLite
   return new PrismaClient()

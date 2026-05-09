@@ -16,7 +16,7 @@ export default function ErrorBoundary({ error, reset }: { error: Error & { diges
       </p>
       <div className="flex justify-center gap-4 pt-4">
         <Button onClick={() => reset()}>Try again</Button>
-        <Button variant="outline" asChild><Link href="/admin/dashboard">Go to Admin Dashboard</Link></Button>
+        <Link href="/admin/dashboard"><Button variant="outline">Go to Admin Dashboard</Button></Link>
       </div>
     </div>
   )

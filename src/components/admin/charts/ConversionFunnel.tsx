@@ -25,7 +25,8 @@ export function ConversionFunnel({ data }: { data: FunnelData }) {
     { name: 'Converted', count: data.converted, fill: '#000000' },
   ]
 
-  const formatLabel = (val: number | string) => {
+  const formatLabel = (val: any) => {
+    if (typeof val !== 'number' && typeof val !== 'string') return '';
     return `${val} (${((Number(val) / data.totalAssigned) * 100).toFixed(0)}%)`
   }
 
