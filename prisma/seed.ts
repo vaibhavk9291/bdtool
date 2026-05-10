@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '../src/lib/prisma'
 
 async function main() {
   console.log('Seeding database...')
@@ -12,6 +10,17 @@ async function main() {
     create: {
       username: 'admin',
       displayName: 'Admin',
+      role: 'ADMIN',
+    },
+  })
+
+  // Create piyush (Admin)
+  const piyush = await prisma.user.upsert({
+    where: { username: 'piyush' },
+    update: {},
+    create: {
+      username: 'piyush',
+      displayName: 'Piyush',
       role: 'ADMIN',
     },
   })
@@ -37,6 +46,8 @@ async function main() {
       role: 'USER',
     },
   })
+
+  console.log({ admin, piyush, alice, bob })
 
   console.log({ admin, alice, bob })
 }
