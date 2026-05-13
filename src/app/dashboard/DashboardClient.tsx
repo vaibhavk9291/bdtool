@@ -180,7 +180,7 @@ export function DashboardClient() {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
         <Input 
           placeholder="Search name or contact..." 
           value={q} 
@@ -217,8 +217,8 @@ export function DashboardClient() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
+      {/* Desktop Table */}
+      <div className="hidden md:block border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs sticky top-0">
             <tr>
@@ -303,6 +303,79 @@ export function DashboardClient() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {loading ? (
+          <div className="py-12 text-center text-gray-500 bg-white border border-gray-200 rounded-lg">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+            Loading your leads...
+          </div>
+        ) : leads.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 bg-white border border-gray-200 rounded-lg">
+            {hasFilters ? 'No leads match your filters.' : 'No leads assigned yet. Check back soon.'}
+          </div>
+        ) : (
+          leads.map(lead => (
+            <div key={lead.id} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-medium text-black">{lead.name}</h3>
+                  <div className="text-gray-600 text-sm mt-0.5">
+                    {lead.contact.includes('@') ? (
+                      <a href={`mailto:${lead.contact}`} className="hover:underline hover:text-black">{lead.contact}</a>
+                    ) : (
+                      <a href={`tel:${lead.contact}`} className="hover:underline hover:text-black">{lead.contact}</a>
+                    )}
+                  </div>
+                </div>
+                <CallButton 
+                  lead={lead}
+                  onCallLogged={(count, lastCalled) => updateLeadInList(lead.id, { callCount: count, lastCalledAt: lastCalled })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-500 text-xs block mb-1">Status</span>
+                  <InlineStatusEditor 
+                    leadId={lead.id} 
+                    initialStatus={lead.status} 
+                    onStatusChange={fetchLeads} 
+                  />
+                </div>
+                <div>
+                  <span className="text-gray-500 text-xs block mb-1">Website</span>
+                  {lead.hasWebsite ? <span className="text-xs bg-gray-100 px-2 py-1 rounded">Yes</span> : <span className="text-xs text-gray-400">No</span>}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-gray-500 text-xs block mb-1">First Interest</span>
+                <InlineInterestEditor 
+                  leadId={lead.id}
+                  initialValue={lead.firstInterest || ''}
+                />
+              </div>
+
+              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 text-xs"
+                  onClick={() => setDrawerLeadId(lead.id)}
+                >
+                  Follow-ups ({lead.activeFollowUps}/4)
+                </Button>
+                <div className="text-right text-xs text-gray-500">
+                  <div>Calls: <span className="font-mono text-gray-700">{lead.callCount}</span></div>
+                  <div>Last: {formatRelativeTime(lead.lastCalledAt)}</div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Pagination */}

@@ -17,15 +17,12 @@ export default async function AdminLayout({
   })
 
   return (
-    <AppShell user={session} mainClassName="flex-1 flex w-full">
-      <aside className="w-56 border-r border-gray-200 bg-white flex-shrink-0">
-        <SidebarNav unreadCount={unreadCount} />
-      </aside>
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {children}
-        </div>
-      </div>
+    <AppShell 
+      user={session} 
+      mainClassName="flex-1 overflow-auto max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8 w-full"
+      sidebar={<SidebarNav unreadCount={unreadCount} />}
+    >
+      {children}
       <InstallPrompt />
     </AppShell>
   )

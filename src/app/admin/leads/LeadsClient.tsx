@@ -216,7 +216,7 @@ export function LeadsClientInner({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
         <Input 
           placeholder="Search name or contact..." 
           defaultValue={q} 
@@ -280,7 +280,7 @@ export function LeadsClientInner({
 
       {/* Visual layout mirrors src/components/dashboard/DashboardClient.tsx. */}
       {/* Keep these in sync if shared visual changes are needed in future phases. */}
-      <div className="border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
+      <div className="hidden md:block border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs sticky top-0">
             <tr>
@@ -415,6 +415,123 @@ export function LeadsClientInner({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {loading ? (
+          <div className="py-12 text-center text-gray-500 bg-white border border-gray-200 rounded-lg">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+            Loading...
+          </div>
+        ) : data.rows.length === 0 ? (
+          <div className="py-12 text-center text-gray-500 bg-white border border-gray-200 rounded-lg">
+            No leads found.
+          </div>
+        ) : (
+          data.rows.map(row => {
+            const isChanged = changedRowIds.has(row.id)
+            return (
+              <div key={row.id} className={`bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3 transition-colors duration-1000 ${isChanged ? 'bg-green-50' : ''}`}>
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-3">
+                    <div className="mt-1">
+                      <Checkbox 
+                        checked={selectedIds.has(row.id)}
+                        onChange={() => toggleSelect(row.id)}
+                      />
+                    </div>
+                    <div>
+                      <button onClick={() => setSelectedLeadIdForDrawer(row.id)} className="hover:underline text-left text-black font-medium">
+                        {row.name}
+                      </button>
+                      <div className="text-gray-600 text-sm mt-0.5">
+                        {row.contact.includes('@') ? (
+                          <a href={`mailto:${row.contact}`} className="hover:underline hover:text-black">{row.contact}</a>
+                        ) : (
+                          <a href={`tel:${row.contact}`} className="hover:underline hover:text-black">{row.contact}</a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative group/menu">
+                    <button className="p-1 text-gray-400 hover:text-black rounded">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                    <div className="absolute right-0 top-full mt-1 hidden group-hover/menu:block bg-white border border-gray-200 shadow-lg rounded-md z-10 min-w-[120px] py-1">
+                      <button 
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => {
+                          setSelectedIds(new Set([row.id]))
+                          setBulkAssignOpen(true)
+                        }}
+                      >
+                        Reassign
+                      </button>
+                      <button 
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        onClick={() => { 
+                          setTargetDeleteId(row.id)
+                          setDeleteConfirmOpen(true)
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-500 text-xs block mb-1">Status</span>
+                    <StatusPill status={row.status} />
+                  </div>
+                  <div>
+                    <span className="text-gray-500 text-xs block mb-1">Assigned To</span>
+                    <Select 
+                      className="h-8 py-1 px-2 w-full text-xs"
+                      value={row.assignedToId || ''}
+                      onChange={(e) => handleSingleReassign(row.id, e.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+                      {users.map(u => <option key={u.id} value={u.id}>{u.displayName}</option>)}
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-sm">
+                  <div>
+                    <span className="text-gray-500 text-xs block mb-1">Website</span>
+                    {row.hasWebsite ? <span className="text-xs bg-gray-100 px-2 py-1 rounded">Yes</span> : <span className="text-xs text-gray-400">No</span>}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-500 text-xs block mb-1">First Interest</span>
+                    {row.firstInterest ? (
+                      <span className="text-gray-900 truncate max-w-[120px] inline-block align-bottom" title={row.firstInterest}>{row.firstInterest}</span>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 text-xs"
+                    onClick={() => setSelectedFollowUpsLeadId(row.id)}
+                  >
+                    Follow-ups ({row.activeFollowUps || 0}/4)
+                  </Button>
+                  <div className="text-right text-xs text-gray-500">
+                    <div>Calls: <span className="font-mono text-gray-700">{row.callCount}</span></div>
+                    <div>Last: {formatRelativeTime(row.lastCalledAt)}</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
       </div>
 
       {data.total > 0 && (

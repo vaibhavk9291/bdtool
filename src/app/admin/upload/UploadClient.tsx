@@ -145,8 +145,9 @@ export function UploadClient({ users }: { users: { id: string, displayName: stri
             </Button>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white overflow-hidden overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm text-left">
               <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 font-medium">
                 <tr>
                   <th className="px-4 py-3 w-16">Row</th>
@@ -179,6 +180,34 @@ export function UploadClient({ users }: { users: { id: string, displayName: stri
                 Showing first 50 rows.
               </div>
             )}
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {previewRows.slice(0, 50).map((row, i) => (
+                <div key={i} className={`p-4 space-y-2 ${row.status === 'error' ? 'bg-red-50' : 'bg-white'}`}>
+                  <div className="flex justify-between items-start">
+                    <span className="font-medium text-sm text-gray-500">Row {row.rowNumber}</span>
+                    <span>
+                      {row.status === 'valid' ? (
+                        <span className="text-green-600 text-sm font-medium">✓ Valid</span>
+                      ) : (
+                        <span className="text-red-600 text-sm font-medium">✗ {row.reason}</span>
+                      )}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{row.name}</div>
+                    <div className="text-xs text-gray-500 mt-1">{row.contact} • {row.hasWebsite ? 'Website' : 'No Website'}</div>
+                  </div>
+                </div>
+              ))}
+              {previewRows.length > 50 && (
+                <div className="px-4 py-3 bg-gray-50 text-center text-sm text-gray-500">
+                  Showing first 50 rows.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

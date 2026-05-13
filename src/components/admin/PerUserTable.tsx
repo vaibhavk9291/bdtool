@@ -26,8 +26,9 @@ export function PerUserTable({ stats }: { stats: UserStats[] }) {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
-      <table className="w-full text-sm text-left">
+    <>
+      <div className="hidden md:block border border-gray-200 rounded-lg overflow-x-auto bg-white shadow-sm">
+        <table className="w-full text-sm text-left">
         <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-xs sticky top-0">
           <tr>
             <th className="px-4 py-3 font-medium">User</th>
@@ -71,7 +72,54 @@ export function PerUserTable({ stats }: { stats: UserStats[] }) {
             ))
           )}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {stats.length === 0 ? (
+          <div className="px-4 py-8 text-center text-gray-500 bg-white rounded-lg border border-gray-200">
+            No users yet. Add users from the Users page.
+          </div>
+        ) : (
+          stats.map(s => (
+            <div key={s.userId} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3 shadow-sm">
+              <div className="flex justify-between items-start">
+                <Link href={`/admin/users/${s.userId}`} className="block">
+                  <div className="font-medium text-gray-900 hover:underline">
+                    {s.displayName}
+                  </div>
+                  <div className="text-xs text-gray-500">@{s.username}</div>
+                </Link>
+                <div className="text-right">
+                  <div className="text-xs text-gray-500">Conv. Rate</div>
+                  <div className="font-medium">{s.conversionRate.toFixed(1)}%</div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-2 py-2 border-t border-gray-100 text-center">
+                <div>
+                  <div className="text-xs text-gray-500">Calls</div>
+                  <div className="font-medium">{s.callsMade.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Assigned</div>
+                  <div className="font-medium">{s.leadsAssigned.toLocaleString()}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Converted</div>
+                  <div className="font-medium">{s.converted.toLocaleString()}</div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center text-xs text-gray-500 pt-1">
+                <div>Hot: {s.hotLeads.toLocaleString()}</div>
+                <div>Last Active: {formatRelTime(s.lastActiveAt)}</div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </>
   )
 }
