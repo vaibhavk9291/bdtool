@@ -47,7 +47,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <DashboardClient />
+      <DashboardClient bdName={session.displayName} />
     </div>
   )
 }

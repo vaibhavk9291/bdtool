@@ -17,48 +17,36 @@ interface CallButtonProps {
 }
 
 export function CallButton({ lead, onCallLogged }: CallButtonProps) {
-  const [status, setStatus] = React.useState<'default' | 'calling' | 'called'>('default')
-  const [lastCalledAt, setLastCalledAt] = React.useState(lead.lastCalledAt)
   const [popupOpen, setPopupOpen] = React.useState(false)
+  const [hasBeenCalled, setHasBeenCalled] = React.useState(lead.callCount > 0)
 
-  const isRecentlyCalled = React.useMemo(() => {
-    if (!lastCalledAt) return false
-    // eslint-disable-next-line
-    const diff = Date.now() - new Date(lastCalledAt).getTime()
-    return diff < 1000 * 60 * 60 // 1 hour
-  }, [lastCalledAt])
+  // Sync state if lead.callCount changes externally (e.g. from props)
+  React.useEffect(() => {
+    setHasBeenCalled(lead.callCount > 0)
+  }, [lead.callCount])
 
   const handleCall = () => {
-    setPopupOpen(true)
+    if (!hasBeenCalled) {
+      setPopupOpen(true)
+    }
   }
 
   const handleCallLogged = (updated: { callCount: number; lastCalledAt: string; callId?: string }) => {
-    setLastCalledAt(updated.lastCalledAt)
-    setStatus('called')
-    
+    setHasBeenCalled(true)
     if (onCallLogged) onCallLogged(updated.callCount, updated.lastCalledAt)
-
-    setTimeout(() => {
-      setStatus('default')
-    }, 5000)
   }
 
   return (
     <>
       <Button 
         size="sm" 
-        variant={status === 'called' ? 'default' : (isRecentlyCalled ? 'outline' : 'default')}
-        disabled={status === 'calling'}
+        variant="default"
+        disabled={hasBeenCalled}
         onClick={handleCall}
-        className={status === 'called' ? 'bg-black text-white hover:bg-black' : ''}
+        className={hasBeenCalled ? 'bg-black text-white hover:bg-black opacity-100' : ''}
       >
-        {status === 'calling' && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
-        {status === 'called' && <Check className="w-3 h-3 mr-2" />}
-        {status === 'default' && <Phone className="w-3 h-3 mr-2" />}
-        
-        {status === 'calling' && 'Calling...'}
-        {status === 'called' && 'Called ✓'}
-        {status === 'default' && (isRecentlyCalled ? 'Call again' : 'Call')}
+        {hasBeenCalled ? <Check className="w-3 h-3 mr-2" /> : <Phone className="w-3 h-3 mr-2" />}
+        {hasBeenCalled ? 'Called ✓' : 'Call'}
       </Button>
 
       <CallPopup 
@@ -67,7 +55,7 @@ export function CallButton({ lead, onCallLogged }: CallButtonProps) {
           name: lead.name,
           contact: lead.contact,
           callCount: lead.callCount,
-          lastCalledAt: lastCalledAt
+          lastCalledAt: lead.lastCalledAt
         }}
         open={popupOpen}
         onClose={() => setPopupOpen(false)}

@@ -7,7 +7,9 @@ import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
 import { StatusPill } from '@/components/ui/StatusPill'
 import { CallButton } from '@/components/ui/CallButton'
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton'
 import { FollowUpDrawer } from './FollowUpDrawer'
+import { MeetingDrawer } from '@/components/dashboard/MeetingDrawer'
 import { ExportLeadsDialog } from '@/components/leads/ExportLeadsDialog'
 import { useAutoSave } from '@/hooks/useAutoSave'
 import { toast } from 'sonner'
@@ -110,7 +112,7 @@ function InlineStatusEditor({ leadId, initialStatus, onStatusChange }: { leadId:
   )
 }
 
-export function DashboardClient() {
+export function DashboardClient({ bdName = 'Business Development Executive' }: { bdName?: string }) {
   const [leads, setLeads] = useState<Lead[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -124,6 +126,7 @@ export function DashboardClient() {
 
   // Drawer state
   const [drawerLeadId, setDrawerLeadId] = useState<string | null>(null)
+  const [meetingDrawerLeadId, setMeetingDrawerLeadId] = useState<string | null>(null)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
 
   const fetchLeads = useCallback(async () => {
@@ -228,6 +231,8 @@ export function DashboardClient() {
               <th className="px-4 py-3 font-medium">Web</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium w-1/4">First Interest</th>
+              <th className="px-4 py-3 font-medium">Message</th>
+              <th className="px-4 py-3 font-medium">Meetings</th>
               <th className="px-4 py-3 font-medium">Follow-ups</th>
               <th className="px-4 py-3 font-medium text-right">Calls</th>
               <th className="px-4 py-3 font-medium text-right">Last Called</th>
@@ -281,6 +286,19 @@ export function DashboardClient() {
                       leadId={lead.id}
                       initialValue={lead.firstInterest || ''}
                     />
+                  </td>
+                  <td className="px-4 py-2 align-top">
+                    {!lead.contact.includes('@') && <WhatsAppButton lead={lead} bdName={bdName} />}
+                  </td>
+                  <td className="px-4 py-2 align-top">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 text-xs whitespace-nowrap"
+                      onClick={() => setMeetingDrawerLeadId(lead.id)}
+                    >
+                      Set Meeting
+                    </Button>
                   </td>
                   <td className="px-4 py-2 align-top">
                     <Button 
@@ -359,18 +377,31 @@ export function DashboardClient() {
                 />
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 text-xs"
-                  onClick={() => setDrawerLeadId(lead.id)}
-                >
-                  Follow-ups ({lead.activeFollowUps}/4)
-                </Button>
-                <div className="text-right text-xs text-gray-500">
+              <div className="pt-3 border-t border-gray-100 mt-2 space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {!lead.contact.includes('@') && (
+                    <WhatsAppButton lead={lead} bdName={bdName} className="flex-1 min-w-[120px] h-8 text-xs" />
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 min-w-[120px] h-8 text-xs"
+                    onClick={() => setMeetingDrawerLeadId(lead.id)}
+                  >
+                    Set Meeting
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 min-w-[120px] h-8 text-xs"
+                    onClick={() => setDrawerLeadId(lead.id)}
+                  >
+                    Follow-ups ({lead.activeFollowUps}/4)
+                  </Button>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-gray-50 text-xs text-gray-500">
                   <div>Calls: <span className="font-mono text-gray-700">{lead.callCount}</span></div>
-                  <div>Last: {formatRelativeTime(lead.lastCalledAt)}</div>
+                  <div>Last called: {formatRelativeTime(lead.lastCalledAt)}</div>
                 </div>
               </div>
             </div>
@@ -391,7 +422,7 @@ export function DashboardClient() {
         </div>
       )}
 
-      {/* Drawer */}
+      {/* Drawers */}
       {drawerLeadId && (
         <FollowUpDrawer 
           leadId={drawerLeadId}
@@ -400,6 +431,14 @@ export function DashboardClient() {
             setDrawerLeadId(null)
             fetchLeads() // refresh to update activeFollowUps count
           }} 
+        />
+      )}
+
+      {meetingDrawerLeadId && (
+        <MeetingDrawer 
+          leadId={meetingDrawerLeadId}
+          leadName={leads.find(l => l.id === meetingDrawerLeadId)?.name || 'Lead'}
+          onClose={() => setMeetingDrawerLeadId(null)}
         />
       )}
 

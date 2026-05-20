@@ -1,4 +1,4 @@
-import { Phone, RefreshCw, Upload, UserPlus, CalendarPlus, Trash, type LucideIcon } from 'lucide-react'
+import { Phone, RefreshCw, Upload, UserPlus, CalendarPlus, Trash, MessageCircle, type LucideIcon } from 'lucide-react'
 
 export interface EnrichedActivityLog {
   id: string
@@ -26,9 +26,17 @@ export function formatActivity(log: EnrichedActivityLog): { text: string, icon: 
       text = `${userName} called ${log.leadName || 'a lead'}`
       icon = Phone
       break
+    case 'WHATSAPP_SENT':
+      text = `${userName} sent a WhatsApp message to ${log.leadName || 'a lead'}`
+      icon = MessageCircle
+      break
     case 'STATUS_CHANGE':
       text = `${userName} changed status of ${log.leadName || 'a lead'} to ${String(metadata.to || 'something')}`
       icon = RefreshCw
+      break
+    case 'MEETING_SET':
+      text = `${userName} scheduled an ${String(metadata.type || '')} meeting with ${log.leadName || 'a lead'}`
+      icon = CalendarPlus
       break
     case 'FOLLOWUP_SET':
       text = `${userName} ${metadata.completed ? 'completed' : 'set'} Follow-up ${String(metadata.slot)} for ${log.leadName || 'a lead'}`
