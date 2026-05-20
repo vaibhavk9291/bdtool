@@ -10,13 +10,21 @@ interface WhatsAppButtonProps {
     id: string
     name: string
     contact: string
+    whatsappSentAt?: string | null
   }
   bdName: string
   className?: string
 }
 
 export function WhatsAppButton({ lead, bdName, className }: WhatsAppButtonProps) {
-  const [status, setStatus] = React.useState<'default' | 'sending' | 'sent'>('default')
+  const [status, setStatus] = React.useState<'default' | 'sending' | 'sent'>(
+    lead.whatsappSentAt ? 'sent' : 'default'
+  )
+
+  // Sync state if lead changes
+  React.useEffect(() => {
+    setStatus(lead.whatsappSentAt ? 'sent' : 'default')
+  }, [lead.whatsappSentAt])
 
   const handleSend = async () => {
     setStatus('sending')
@@ -55,7 +63,6 @@ Intellobyte`
       window.open(url, '_blank')
       
       setStatus('sent')
-      setTimeout(() => setStatus('default'), 3000)
     } catch (err) {
       toast.error('Failed to send WhatsApp message')
       setStatus('default')
@@ -75,7 +82,7 @@ Intellobyte`
       {status === 'default' && <MessageCircle className="w-3 h-3 mr-2" />}
       
       {status === 'sending' && 'Opening...'}
-      {status === 'sent' && 'Opened'}
+      {status === 'sent' && 'Sent'}
       {status === 'default' && 'WhatsApp'}
     </Button>
   )

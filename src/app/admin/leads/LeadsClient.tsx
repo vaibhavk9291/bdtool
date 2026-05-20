@@ -13,6 +13,8 @@ import { MoreHorizontal, Loader2, Download } from 'lucide-react'
 import { LeadDetailDrawer } from '@/components/admin/LeadDetailDrawer'
 import { AdminFollowUpsDrawer } from '@/components/admin/AdminFollowUpsDrawer'
 import { ExportLeadsDialog } from '@/components/leads/ExportLeadsDialog'
+import { WhatsAppButton } from '@/components/ui/WhatsAppButton'
+import { MeetingDrawer } from '@/components/dashboard/MeetingDrawer'
 
 import { usePolling } from '@/hooks/usePolling'
 
@@ -40,6 +42,8 @@ interface Lead {
   updatedAt: string
   firstInterest: string | null
   activeFollowUps: number
+  meetingsCount: number
+  whatsappSentAt: string | null
   calls: Array<{ calledAt: string, notes: string | null }>
   followUps: Array<{ slot: number, scheduledAt: string }>
 }
@@ -86,13 +90,14 @@ export function LeadsClientInner({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [selectedLeadIdForDrawer, setSelectedLeadIdForDrawer] = useState<string | null>(null)
   const [selectedFollowUpsLeadId, setSelectedFollowUpsLeadId] = useState<string | null>(null)
+  const [meetingDrawerLeadId, setMeetingDrawerLeadId] = useState<string | null>(null)
   const [bulkAssignOpen, setBulkAssignOpen] = useState(false)
   const [bulkAssignTo, setBulkAssignTo] = useState('')
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [targetDeleteId, setTargetDeleteId] = useState<string | null>(null)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
 
-  const isPaused = bulkAssignOpen || deleteConfirmOpen || selectedIds.size > 0 || !!selectedLeadIdForDrawer || !!selectedFollowUpsLeadId || exportDialogOpen
+  const isPaused = bulkAssignOpen || deleteConfirmOpen || selectedIds.size > 0 || !!selectedLeadIdForDrawer || !!selectedFollowUpsLeadId || !!meetingDrawerLeadId || exportDialogOpen
 
   const fetcher = useCallback(async () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -295,6 +300,8 @@ export function LeadsClientInner({
               <th className="px-4 py-3 font-medium">Web</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium w-1/4">First Interest</th>
+              <th className="px-4 py-3 font-medium">Message</th>
+              <th className="px-4 py-3 font-medium">Meetings</th>
               <th className="px-4 py-3 font-medium">Follow-ups</th>
               <th className="px-4 py-3 font-medium text-right">Calls</th>
               <th className="px-4 py-3 font-medium text-right">Last Called</th>
@@ -355,6 +362,21 @@ export function LeadsClientInner({
                       ) : (
                         <span className="text-gray-400">—</span>
                       )}
+                    </td>
+                    <td className="px-4 py-2 align-top">
+                      {!row.contact.includes('@') && (
+                        <WhatsAppButton lead={row} bdName={row.assignedTo?.displayName || 'Admin'} />
+                      )}
+                    </td>
+                    <td className="px-4 py-2 align-top">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className={`h-8 text-xs whitespace-nowrap ${row.meetingsCount > 0 ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800' : ''}`}
+                        onClick={() => setMeetingDrawerLeadId(row.id)}
+                      >
+                        {row.meetingsCount > 0 ? 'Meeting Set ✓' : 'Set Meeting'}
+                      </Button>
                     </td>
                     <td className="px-4 py-2 align-top">
                       <Button 
@@ -514,18 +536,31 @@ export function LeadsClientInner({
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 text-xs"
-                    onClick={() => setSelectedFollowUpsLeadId(row.id)}
-                  >
-                    Follow-ups ({row.activeFollowUps || 0}/4)
-                  </Button>
-                  <div className="text-right text-xs text-gray-500">
+                <div className="pt-3 border-t border-gray-100 mt-2 space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {!row.contact.includes('@') && (
+                      <WhatsAppButton lead={row} bdName={row.assignedTo?.displayName || 'Admin'} className="flex-1 min-w-[120px] h-8 text-xs" />
+                    )}
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className={`flex-1 min-w-[120px] h-8 text-xs ${row.meetingsCount > 0 ? 'bg-green-50 text-green-700 border-green-200' : ''}`}
+                      onClick={() => setMeetingDrawerLeadId(row.id)}
+                    >
+                      {row.meetingsCount > 0 ? 'Meeting Set ✓' : 'Set Meeting'}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 min-w-[120px] h-8 text-xs"
+                      onClick={() => setSelectedFollowUpsLeadId(row.id)}
+                    >
+                      Follow-ups ({row.activeFollowUps || 0}/4)
+                    </Button>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-50 text-xs text-gray-500">
                     <div>Calls: <span className="font-mono text-gray-700">{row.callCount}</span></div>
-                    <div>Last: {formatRelativeTime(row.lastCalledAt)}</div>
+                    <div>Last called: {formatRelativeTime(row.lastCalledAt)}</div>
                   </div>
                 </div>
               </div>
@@ -592,6 +627,17 @@ export function LeadsClientInner({
           leadId={selectedFollowUpsLeadId}
           leadName={data.rows.find(r => r.id === selectedFollowUpsLeadId)?.name || 'Lead'}
           onClose={() => setSelectedFollowUpsLeadId(null)}
+        />
+      )}
+
+      {meetingDrawerLeadId && (
+        <MeetingDrawer 
+          leadId={meetingDrawerLeadId}
+          leadName={data.rows.find(l => l.id === meetingDrawerLeadId)?.name || 'Lead'}
+          onClose={() => {
+            setMeetingDrawerLeadId(null)
+            fetchLeads() // refresh to update meetingsCount if changed
+          }}
         />
       )}
 

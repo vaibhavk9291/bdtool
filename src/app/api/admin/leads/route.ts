@@ -73,7 +73,12 @@ export async function GET(request: Request) {
         assignedTo: { select: { displayName: true } },
         calls: { orderBy: { calledAt: 'desc' }, take: 1, select: { calledAt: true, notes: true } },
         followUps: { where: { completed: false, scheduledAt: { not: null } }, orderBy: { scheduledAt: 'asc' }, take: 1, select: { slot: true, scheduledAt: true } },
-        _count: { select: { followUps: { where: { completed: false } } } }
+        _count: { 
+          select: { 
+            followUps: { where: { completed: false } },
+            meetings: true 
+          } 
+        }
       },
       orderBy: { createdAt: 'desc' }
     }),
@@ -82,7 +87,9 @@ export async function GET(request: Request) {
 
   const mappedRows = rows.map(r => ({
     ...r,
-    activeFollowUps: r._count.followUps
+    activeFollowUps: r._count.followUps,
+    meetingsCount: r._count.meetings,
+    whatsappSentAt: r.whatsappSentAt?.toISOString() || null
   }))
 
   return NextResponse.json({ rows: mappedRows, total, page, pageSize })

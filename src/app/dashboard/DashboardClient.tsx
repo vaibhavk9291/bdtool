@@ -26,6 +26,8 @@ interface Lead {
   callCount: number
   lastCalledAt: string | null
   activeFollowUps: number
+  meetingsCount: number
+  whatsappSentAt: string | null
 }
 
 // Inline input with auto-save for First Interest
@@ -294,10 +296,10 @@ export function DashboardClient({ bdName = 'Business Development Executive' }: {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-8 text-xs whitespace-nowrap"
+                      className={`h-8 text-xs whitespace-nowrap ${lead.meetingsCount > 0 ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800' : ''}`}
                       onClick={() => setMeetingDrawerLeadId(lead.id)}
                     >
-                      Set Meeting
+                      {lead.meetingsCount > 0 ? 'Meeting Set ✓' : 'Set Meeting'}
                     </Button>
                   </td>
                   <td className="px-4 py-2 align-top">
@@ -385,10 +387,10 @@ export function DashboardClient({ bdName = 'Business Development Executive' }: {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 min-w-[120px] h-8 text-xs"
+                    className={`flex-1 min-w-[120px] h-8 text-xs ${lead.meetingsCount > 0 ? 'bg-green-50 text-green-700 border-green-200' : ''}`}
                     onClick={() => setMeetingDrawerLeadId(lead.id)}
                   >
-                    Set Meeting
+                    {lead.meetingsCount > 0 ? 'Meeting Set ✓' : 'Set Meeting'}
                   </Button>
                   <Button 
                     variant="outline" 
@@ -438,7 +440,10 @@ export function DashboardClient({ bdName = 'Business Development Executive' }: {
         <MeetingDrawer 
           leadId={meetingDrawerLeadId}
           leadName={leads.find(l => l.id === meetingDrawerLeadId)?.name || 'Lead'}
-          onClose={() => setMeetingDrawerLeadId(null)}
+          onClose={() => {
+            setMeetingDrawerLeadId(null)
+            fetchLeads()
+          }}
         />
       )}
 

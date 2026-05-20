@@ -49,8 +49,11 @@ export async function GET(request: Request) {
         skip: (page - 1) * 25,
         take: 25,
         include: {
-          followUps: {
-            where: { completed: false }
+          _count: {
+            select: {
+              followUps: { where: { completed: false } },
+              meetings: true
+            }
           }
         }
       })
@@ -58,7 +61,9 @@ export async function GET(request: Request) {
 
     const rows = leads.map(l => ({
       ...l,
-      activeFollowUps: l.followUps.length
+      activeFollowUps: l._count.followUps,
+      meetingsCount: l._count.meetings,
+      whatsappSentAt: l.whatsappSentAt?.toISOString() || null
     }))
 
     return NextResponse.json({ rows, total })

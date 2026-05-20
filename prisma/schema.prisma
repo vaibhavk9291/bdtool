@@ -29,6 +29,7 @@ model Lead {
   firstInterest String?   // free text — what the lead initially wanted
   callCount     Int       @default(0)
   lastCalledAt  DateTime?
+  whatsappSentAt DateTime?
   assignedToId  String?
   assignedTo    User?     @relation(fields: [assignedToId], references: [id])
   createdAt     DateTime  @default(now())

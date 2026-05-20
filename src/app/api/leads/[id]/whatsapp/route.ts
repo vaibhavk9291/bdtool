@@ -19,19 +19,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const now = new Date()
 
-    const log = await prisma.activityLog.create({
-      data: {
-        userId: session.id,
-        action: 'WHATSAPP_SENT',
-        entity: 'LEAD',
-        entityId: id,
-        createdAt: now
-      }
-    })
+    const log = await prisma.$transaction([
+      prisma.lead.update({
+        where: { id },
+        data: { whatsappSentAt: now }
+      }),
+      prisma.activityLog.create({
+        data: {
+          userId: session.id,
+          action: 'WHATSAPP_SENT',
+          entity: 'LEAD',
+          entityId: id,
+          createdAt: now
+        }
+      })
+    ])
 
     logger.info('whatsapp.logged', { leadId: id, userId: session.id })
 
-    return NextResponse.json({ success: true, logId: log.id })
+    return NextResponse.json({ success: true, logId: log[1].id })
   } catch (error) {
     return handleApiError(error)
   }
