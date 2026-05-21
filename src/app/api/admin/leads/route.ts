@@ -15,6 +15,7 @@ export async function GET(request: Request) {
   const website = searchParams.get('website') || ''
   const followupState = searchParams.get('followupState') || ''
   const firstInterest = searchParams.get('firstInterest') || ''
+  const called = searchParams.get('called') || 'ALL'
 
   const where: Prisma.LeadWhereInput = {}
 
@@ -39,6 +40,12 @@ export async function GET(request: Request) {
 
   if (website && website !== 'ALL') {
     where.hasWebsite = website === 'YES'
+  }
+
+  if (called === 'CALLED') {
+    where.callCount = { gt: 0 }
+  } else if (called === 'NOT_CALLED') {
+    where.callCount = 0
   }
 
   if (firstInterest && firstInterest !== 'ALL') {
@@ -80,7 +87,7 @@ export async function GET(request: Request) {
           } 
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: called === 'CALLED' ? { lastCalledAt: 'desc' } : { createdAt: 'desc' }
     }),
     prisma.lead.count({ where })
   ])

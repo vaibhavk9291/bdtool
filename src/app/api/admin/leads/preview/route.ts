@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
 import * as xlsx from 'xlsx'
+import prisma from '@/lib/prisma'
 
 export async function POST(request: Request) {
   await requireAdmin()
@@ -17,6 +18,33 @@ export async function POST(request: Request) {
     const wb = xlsx.read(buffer, { type: 'buffer' })
     const ws = wb.Sheets[wb.SheetNames[0]]
     const data: Record<string, unknown>[] = xlsx.utils.sheet_to_json(ws, { defval: '' })
+
+    const allContacts = new Set<string>()
+    for (const row of data) {
+      let rawContact = ''
+      for (const [key, value] of Object.entries(row)) {
+        const normalizedKey = key.trim().toLowerCase()
+        if (normalizedKey.includes('contact') || normalizedKey.includes('phone') || normalizedKey.includes('mobile') || normalizedKey.includes('number')) {
+          rawContact = String(value)
+        }
+      }
+      const contact = rawContact.trim()
+      if (contact) {
+        allContacts.add(contact)
+      }
+    }
+
+    const existingLeads = await prisma.lead.findMany({
+      where: {
+        contact: {
+          in: Array.from(allContacts)
+        }
+      },
+      select: {
+        contact: true
+      }
+    })
+    const existingContactsInDb = new Set(existingLeads.map(l => l.contact.trim().toLowerCase()))
 
     const parsedRows = []
     const seen = new Set<string>()
@@ -56,11 +84,17 @@ export async function POST(request: Request) {
       } else if (!contact) {
         status = 'error'
         reason = 'Missing contact'
+      } else if (hasWebsite) {
+        status = 'error'
+        reason = 'Has a website'
       } else {
         const uniqueKey = `${name.toLowerCase()}|${contact.toLowerCase()}`
         if (seen.has(uniqueKey)) {
           status = 'error'
           reason = 'Duplicate in file'
+        } else if (existingContactsInDb.has(contact.toLowerCase())) {
+          status = 'error'
+          reason = 'Already exists in database'
         } else {
           seen.add(uniqueKey)
         }

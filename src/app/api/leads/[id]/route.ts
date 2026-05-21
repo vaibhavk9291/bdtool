@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 import { z } from 'zod'
 
 const patchSchema = z.object({
-  status: z.enum(['NEW', 'HOT', 'WARM', 'COLD', 'NOT_INTERESTED', 'CONVERTED', 'DO_NOT_CALL']).optional(),
+  status: z.enum(['NEW', 'HOT', 'WARM', 'COLD', 'NOT_INTERESTED', 'CONVERTED', 'NOT_RECEIVED']).optional(),
   firstInterest: z.string().nullable().optional()
 })
 

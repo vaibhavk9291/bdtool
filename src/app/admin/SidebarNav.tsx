@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Users, FileSpreadsheet, Upload, LayoutDashboard, Activity } from 'lucide-react'
+import { Users, FileSpreadsheet, Upload, LayoutDashboard, Activity, ClipboardList } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function SidebarNav({ unreadCount }: { unreadCount: number }) {
@@ -14,6 +14,7 @@ export function SidebarNav({ unreadCount }: { unreadCount: number }) {
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/upload', label: 'Upload', icon: Upload },
     { href: '/admin/activity', label: 'Activity', icon: Activity, badge: unreadCount },
+    { href: '/admin/assigning-logs', label: 'Assigning Logs', icon: ClipboardList },
   ]
 
   return (

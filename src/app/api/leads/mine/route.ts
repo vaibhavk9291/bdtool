@@ -41,11 +41,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [total, leads] = await Promise.all([
+    const [total, leads, pendingCount, calledCount] = await Promise.all([
       prisma.lead.count({ where }),
       prisma.lead.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: calledFilter === 'CALLED' ? { lastCalledAt: 'desc' } : { createdAt: 'desc' },
         skip: (page - 1) * 25,
         take: 25,
         include: {
@@ -55,6 +55,18 @@ export async function GET(request: Request) {
               meetings: true
             }
           }
+        }
+      }),
+      prisma.lead.count({
+        where: {
+          assignedToId: session.id,
+          callCount: 0
+        }
+      }),
+      prisma.lead.count({
+        where: {
+          assignedToId: session.id,
+          callCount: { gt: 0 }
         }
       })
     ])
@@ -66,7 +78,7 @@ export async function GET(request: Request) {
       whatsappSentAt: l.whatsappSentAt?.toISOString() || null
     }))
 
-    return NextResponse.json({ rows, total })
+    return NextResponse.json({ rows, total, pendingCount, calledCount })
   } catch (error: unknown) {
     if (error instanceof Error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

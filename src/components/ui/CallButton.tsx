@@ -26,9 +26,7 @@ export function CallButton({ lead, onCallLogged }: CallButtonProps) {
   }, [lead.callCount])
 
   const handleCall = () => {
-    if (!hasBeenCalled) {
-      setPopupOpen(true)
-    }
+    setPopupOpen(true)
   }
 
   const handleCallLogged = (updated: { callCount: number; lastCalledAt: string; callId?: string }) => {
@@ -41,9 +39,8 @@ export function CallButton({ lead, onCallLogged }: CallButtonProps) {
       <Button 
         size="sm" 
         variant="default"
-        disabled={hasBeenCalled}
         onClick={handleCall}
-        className={hasBeenCalled ? 'bg-black text-white hover:bg-black opacity-100' : ''}
+        className={hasBeenCalled ? 'bg-black text-white hover:bg-gray-800' : ''}
       >
         {hasBeenCalled ? <Check className="w-3 h-3 mr-2" /> : <Phone className="w-3 h-3 mr-2" />}
         {hasBeenCalled ? 'Called ✓' : 'Call'}

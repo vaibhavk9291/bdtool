@@ -4,6 +4,7 @@ import * as React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { LogOut, Menu, X } from "lucide-react"
+import { AdminBellNotification } from "@/components/admin/AdminBellNotification"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -46,6 +47,7 @@ export function AppShell({ children, user, mainClassName, sidebar }: AppShellPro
               </button>
             )}
             <div className="font-semibold text-lg tracking-tight">BD Assigner</div>
+            {user.role === 'ADMIN' && <AdminBellNotification />}
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
             <div className="flex items-center space-x-2">

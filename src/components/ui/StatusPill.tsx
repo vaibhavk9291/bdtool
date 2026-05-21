@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Check } from "lucide-react"
 
-export type LeadStatus = "NEW" | "HOT" | "WARM" | "COLD" | "NOT_INTERESTED" | "CONVERTED" | "DO_NOT_CALL"
+export type LeadStatus = "NEW" | "HOT" | "WARM" | "COLD" | "NOT_INTERESTED" | "CONVERTED" | "NOT_RECEIVED"
 
 interface StatusPillProps {
   status: LeadStatus | string
@@ -10,13 +10,13 @@ interface StatusPillProps {
 }
 
 const statusConfig: Record<string, { bg: string, text: string, label: string, icon?: boolean }> = {
-  NEW: { bg: "bg-gray-100", text: "text-gray-700", label: "New" },
-  HOT: { bg: "bg-black", text: "text-white", label: "Hot" },
-  WARM: { bg: "bg-gray-200", text: "text-gray-800", label: "Warm" },
-  COLD: { bg: "bg-gray-50", text: "text-gray-500", label: "Cold" },
-  NOT_INTERESTED: { bg: "bg-gray-100", text: "text-gray-500 line-through", label: "Not Interested" },
-  CONVERTED: { bg: "bg-black", text: "text-white", label: "Converted", icon: true },
-  DO_NOT_CALL: { bg: "bg-gray-900", text: "text-gray-100", label: "Do Not Call" }
+  NEW: { bg: "bg-indigo-50 border border-indigo-100", text: "text-indigo-600", label: "New" },
+  HOT: { bg: "bg-rose-50 border border-rose-100 font-semibold", text: "text-rose-600", label: "Hot" },
+  WARM: { bg: "bg-orange-50 border border-orange-100", text: "text-orange-600", label: "Warm" },
+  COLD: { bg: "bg-cyan-50 border border-cyan-100", text: "text-cyan-600", label: "Cold" },
+  NOT_INTERESTED: { bg: "bg-slate-100", text: "text-slate-400 line-through", label: "Not Interested" },
+  CONVERTED: { bg: "bg-teal-50 border border-teal-200 font-semibold", text: "text-teal-700", label: "Converted", icon: true },
+  NOT_RECEIVED: { bg: "bg-zinc-100 border border-zinc-200", text: "text-zinc-500", label: "Not Received" }
 }
 
 export function StatusPill({ status, className }: StatusPillProps) {

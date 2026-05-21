@@ -4,7 +4,8 @@ import { requireAdmin } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateUserSchema = z.object({
-  active: z.boolean(),
+  active: z.boolean().optional(),
+  avatar: z.string().nullable().optional(),
 })
 
 export async function PATCH(
@@ -17,7 +18,7 @@ export async function PATCH(
     const body = await request.json()
     const data = updateUserSchema.parse(body)
 
-    if (id === session.id && data.active === false) {
+    if (data.active === false && id === session.id) {
       return NextResponse.json({ error: 'Cannot deactivate yourself' }, { status: 400 })
     }
 
@@ -33,9 +34,13 @@ export async function PATCH(
       }
     }
 
+    const updateData: any = {}
+    if (data.active !== undefined) updateData.active = data.active
+    if (data.avatar !== undefined) updateData.avatar = data.avatar
+
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: { active: data.active }
+      data: updateData
     })
 
     await prisma.activityLog.create({
@@ -44,7 +49,7 @@ export async function PATCH(
         action: 'USER_UPDATED',
         entity: 'USER',
         entityId: updatedUser.id,
-        metadata: JSON.stringify({ active: data.active })
+        metadata: JSON.stringify(updateData)
       }
     })
 

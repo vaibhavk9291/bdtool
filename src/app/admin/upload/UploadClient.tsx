@@ -19,6 +19,7 @@ interface PreviewRow {
 
 export function UploadClient({ users }: { users: { id: string, displayName: string }[] }) {
   const [, setFile] = useState<File | null>(null)
+  const [fileName, setFileName] = useState('')
   const [assignedToId, setAssignedToId] = useState('')
   const [previewRows, setPreviewRows] = useState<PreviewRow[]>([])
   const [loading, setLoading] = useState(false)
@@ -28,6 +29,7 @@ export function UploadClient({ users }: { users: { id: string, displayName: stri
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null
     setFile(selectedFile)
+    setFileName(selectedFile ? selectedFile.name : '')
     setPreviewRows([])
     
     if (!selectedFile) return
@@ -65,7 +67,8 @@ export function UploadClient({ users }: { users: { id: string, displayName: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           rows: validRows.map(r => ({ name: r.name, contact: r.contact, hasWebsite: r.hasWebsite })),
-          assignedToId: assignedToId || null
+          assignedToId: assignedToId || null,
+          csvName: fileName || null
         })
       })
       const data = await res.json()

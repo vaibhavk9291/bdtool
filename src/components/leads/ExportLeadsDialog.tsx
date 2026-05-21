@@ -14,7 +14,7 @@ interface ExportLeadsDialogProps {
   currentFilters?: Record<string, string>
 }
 
-const ALL_STATUSES = ['NEW', 'HOT', 'WARM', 'COLD', 'NOT_INTERESTED', 'CONVERTED', 'DO_NOT_CALL']
+const ALL_STATUSES = ['NEW', 'HOT', 'WARM', 'COLD', 'NOT_INTERESTED', 'CONVERTED', 'NOT_RECEIVED']
 
 export function ExportLeadsDialog({ open, onClose, scope, currentFilters }: ExportLeadsDialogProps) {
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set(['HOT', 'WARM', 'CONVERTED']))
